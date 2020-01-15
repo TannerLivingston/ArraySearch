@@ -1,7 +1,9 @@
 ﻿// Written by Joe Zachary for CS 4150, January 2016
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace ArraySearch
 {
@@ -183,7 +185,40 @@ namespace ArraySearch
                     previousTime = currentTime;
                 }
             }
+
+
+
+            // RUN MY THING.........................
+            else if (approach == 11)
+            {
+                // Report average time required to solve anagrams for n and k.
+                Console.WriteLine("Average time to run anagrams for n and k");
+
+                int size = 32;
+                Console.WriteLine("\nSize\tTime (msec)\tDelta (msec)");
+                double previousTime = 0;
+
+                // Going to double it 10 times?
+                for (int i = 0; i <= 10; i++)
+                {
+                    size = size * 2;
+                    double currentTime = TimeAnagrams(size - 1);
+                    Console.Write((size - 1) + "\t" + currentTime.ToString("G3"));
+                    if (i > 0)
+                    {
+                        Console.WriteLine("   \t" + (currentTime - previousTime).ToString("G3"));
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                    }
+                    previousTime = currentTime;
+                }
+            }
+
         }
+
+
 
         /// <summary>
         /// Returns an index of elt within data, or -1 if it isn't there.
@@ -632,6 +667,116 @@ namespace ArraySearch
             // Return the difference
             return totalAverage - overheadAverage;
         }
+
+
+
+
+
+        static int SolveAnagrams(int n, int k, List<string> words)
+        {
+            int result = 0;
+
+            int numWords = n;
+            int numLetters = k;
+
+            string sortedWord;
+            char[] arr;
+            HashSet<string> solutions = new HashSet<string>();
+            HashSet<string> rejected = new HashSet<string>();
+
+            for (int i = 0; i < numWords; i++)
+            {
+                arr = words[i].ToCharArray();
+                Array.Sort(arr);
+                sortedWord = new string(arr);
+
+                if (solutions.Contains(sortedWord))
+                {
+                    solutions.Remove(sortedWord);
+                    rejected.Add(sortedWord);
+                }
+
+                else if (!rejected.Contains(sortedWord))
+                {
+                    solutions.Add(sortedWord);
+                }
+            }
+
+
+            // Print results...
+            result = solutions.Count;
+            //System.Console.Write(result);
+            
+
+            return result;
+        }
+
+
+
+
+        /// <summary>
+        /// Returns the average time required to find an element in an array of
+        /// the given size using binary search, assuming that the element actually
+        /// appears in the array.  Uses a different timer than Search5.
+        /// </summary>
+        public static double TimeAnagrams(int size)
+        {
+            int n = 6;
+            int k = 4;
+            List<string> words = new List<string>() { "tape", "rate", "seat", "pate", "east", "pest" };
+
+            // Get the process
+            Process p = Process.GetCurrentProcess();
+
+            // Keep increasing the number of repetitions until one second elapses.
+            double elapsed = 0;
+            long repetitions = 1;
+            do
+            {
+                repetitions *= 2;
+                TimeSpan start = p.TotalProcessorTime;
+                for (long i = 0; i < repetitions; i++)
+                {
+                    for (int d = 0; d < size; d++)
+                    {
+                        SolveAnagrams(n, k, words);
+                    }
+                }
+                TimeSpan stop = p.TotalProcessorTime;
+                elapsed = stop.TotalMilliseconds - start.TotalMilliseconds;
+            } while (elapsed < DURATION);
+            double totalAverage = elapsed / repetitions / size;
+
+            // Keep increasing the number of repetitions until one second elapses.
+            elapsed = 0;
+            repetitions = 1;
+            do
+            {
+                repetitions *= 2;
+                TimeSpan start = p.TotalProcessorTime;
+                for (long i = 0; i < repetitions; i++)
+                {
+                    for (long d = 0; d < size; d++)
+                    {
+                        //LinearSearch(data, d);
+                    }
+                }
+                TimeSpan stop = p.TotalProcessorTime;
+                elapsed = stop.TotalMilliseconds - start.TotalMilliseconds;
+            } while (elapsed < DURATION);
+            double overheadAverage = elapsed / repetitions / size;
+
+            // Display the raw data as a sanity check
+            if (false)
+            {
+                Console.WriteLine("   Total avg:    " + totalAverage.ToString("G2") + " msecs");
+                Console.WriteLine("   Overhead avg: " + overheadAverage.ToString("G2") + " msecs");
+            }
+
+            // Return the difference
+            return totalAverage - overheadAverage;
+        }
+
     }
 }
 
