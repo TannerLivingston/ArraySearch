@@ -194,15 +194,17 @@ namespace ArraySearch
                 // Report average time required to solve anagrams for n and k.
                 Console.WriteLine("Average time to run anagrams for n and k");
 
-                int size = 32;
+                int size = 16;
+                int k = 5;
+
                 Console.WriteLine("\nSize\tTime (msec)\tDelta (msec)");
                 double previousTime = 0;
 
-                // Going to double it 10 times?
-                for (int i = 0; i <= 10; i++)
+                // Going to double it 15 times
+                for (int i = 0; i <= 15; i++)
                 {
                     size = size * 2;
-                    double currentTime = TimeAnagrams(size - 1);
+                    double currentTime = TimeAnagrams(size - 1, k);
                     Console.Write((size - 1) + "\t" + currentTime.ToString("G3"));
                     if (i > 0)
                     {
@@ -287,7 +289,7 @@ namespace ArraySearch
 
             // Time the operation
             sw.Start();
-            BinarySearch(data, size-1);
+            BinarySearch(data, size - 1);
             sw.Stop();
 
             // Return the number of milliseconds that elapsed
@@ -315,7 +317,7 @@ namespace ArraySearch
             for (long i = 0; i < REPTS; i++)
             {
                 sw.Start();
-                BinarySearch(data, size-1);
+                BinarySearch(data, size - 1);
                 sw.Stop();
             }
 
@@ -377,7 +379,7 @@ namespace ArraySearch
             sw.Start();
             for (long i = 0; i < REPTS; i++)
             {
-                BinarySearch(data, size-1);
+                BinarySearch(data, size - 1);
             }
             sw.Stop();
             double totalAverage = msecs(sw) / REPTS;
@@ -429,7 +431,7 @@ namespace ArraySearch
                 sw.Restart();
                 for (long i = 0; i < repetitions; i++)
                 {
-                    BinarySearch(data, size-1);
+                    BinarySearch(data, size - 1);
                 }
                 sw.Stop();
                 elapsed = msecs(sw);
@@ -706,7 +708,7 @@ namespace ArraySearch
             // Print results...
             result = solutions.Count;
             //System.Console.Write(result);
-            
+
 
             return result;
         }
@@ -719,11 +721,26 @@ namespace ArraySearch
         /// the given size using binary search, assuming that the element actually
         /// appears in the array.  Uses a different timer than Search5.
         /// </summary>
-        public static double TimeAnagrams(int size)
+        public static double TimeAnagrams(int size, int k)
         {
-            int n = 6;
-            int k = 4;
-            List<string> words = new List<string>() { "tape", "rate", "seat", "pate", "east", "pest" };
+            // Generate a list of n random words.
+            List<string> words = new List<string>();
+            string alphabet = "abcdefghijklmnopqrstuvwxyz";
+            Random rand = new Random();
+            string randomWord = "";
+
+            for (int i = 0; i < size; i++)
+            {
+                randomWord = "";
+
+                for (int j = 0; j < k; j++)
+                {
+                    randomWord += alphabet[rand.Next(0, 25)];
+                }
+
+                words.Add(randomWord);
+            }
+
 
             // Get the process
             Process p = Process.GetCurrentProcess();
@@ -739,7 +756,7 @@ namespace ArraySearch
                 {
                     for (int d = 0; d < size; d++)
                     {
-                        SolveAnagrams(n, k, words);
+                        SolveAnagrams(size, k, words);
                     }
                 }
                 TimeSpan stop = p.TotalProcessorTime;
